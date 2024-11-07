@@ -1,6 +1,9 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import { fade } from 'svelte/transition';
+  import WakeLockButton from './components/WakeLockButton.svelte';
+  import NotificationButton from './components/NotificationButton.svelte';
+  import Popup from './components/Popup.svelte';
+  import Footer from './components/Footer.svelte';
 
   let isAwake = false;
   let wakeLock = null;
@@ -20,7 +23,11 @@
     if (notificationSupported && Notification.permission !== 'granted') {
       const permission = await Notification.requestPermission();
       notificationPermissionGranted = permission === 'granted';
-      showPopupMessage("Notification permission granted. You'll receive notifications when the device can go to sleep.");
+      if (notificationPermissionGranted) {
+        showPopupMessage('Notification permission granted. You\'ll receive notifications when the device can go to sleep.');
+      } else {
+        showPopupMessage('Notification permission denied. You won\'t receive notifications when the device can go to sleep.');
+      }
     }
   }
 
@@ -96,26 +103,12 @@
       </div>
     {:else}
       <div class="flex space-x-2">
-        <button
-          on:click={toggleWakeLock}
-          class="text-2xl p-8 rounded-l-full transition-all {isAwake ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700' : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700'} text-white font-bold"
-          disabled={!isSupported}
-        >
-          {isAwake ? 'Disable NoSleep™' : 'Enable NoSleep™'}
-        </button>
-        
-        {#if notificationSupported && !notificationPermissionGranted}
-          <button
-            on:click={requestNotificationPermission}
-            class="text-2xl p-8 rounded-r-full bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-bold"
-          >
-            🔔
-          </button>
-        {:else if notificationPermissionGranted}
-          <div class="flex items-center justify-center text-2xl p-8 rounded-r-full bg-green-500 dark:bg-green-600 text-white font-bold">
-            🔔
-          </div>
-        {/if}
+        <WakeLockButton {isAwake} {toggleWakeLock} {isSupported} />
+        <NotificationButton
+          {notificationSupported}
+          {notificationPermissionGranted}
+          {requestNotificationPermission}
+        />
       </div>
     {/if}
     <p class="mt-4 text-center text-gray-600 dark:text-gray-400">
@@ -123,36 +116,7 @@
     </p>
   </main>
 
-  <footer class="w-full py-4 px-4 bg-gray-200 dark:bg-gray-800 text-center">
-    <p class="text-sm text-gray-600 dark:text-gray-400">
-      &copy; {new Date().getFullYear()} CodeskStudio. All rights reserved.
-    </p>
-    <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
-      Built with Svelte, TailwindCSS | 
-      <a href="https://github.com/CodeskStudio" class="underline hover:text-gray-700 dark:hover:text-gray-300" target="_blank" rel="noopener noreferrer">
-        GitHub
-      </a>
-    </p>
-  </footer>
+  <Footer />
 
-
-  {#if showPopup}
-  <div 
-    transition:fade="{{ duration: 200 }}"
-    class="fixed bottom-60 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4 max-w-md w-full"
-  >
-    <button
-      on:click={closePopup}
-      class="absolute top-2 right-2 h-4 w-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none dark:text-white text-gray-800"
-      aria-label="Close"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-    <p class="text-gray-800 dark:text-gray-200 pr-6">{popupMessage}</p>
-  </div>
-  {/if}
-
+  <Popup {showPopup} {popupMessage} {closePopup} />
 </div>
