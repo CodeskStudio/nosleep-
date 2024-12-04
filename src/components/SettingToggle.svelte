@@ -7,9 +7,6 @@
     export let icon = '';
     export let isEnabled = false;
     export let onChange = null; // Function to handle toggle changes
-    export let actionText = ''; // Optional text for an additional action button
-    export let onAction = null; // Function to handle the action button
-    export let showAction = false; // Whether to display the action button
   
     const dispatch = createEventDispatcher();
   
@@ -20,12 +17,6 @@
       }
     }
   
-    function handleAction() {
-      if (onAction) {
-        onAction();
-        dispatch('action');
-      }
-    }
   </script>
   
   <div class="flex items-center justify-between">
@@ -40,15 +31,6 @@
       </div>
     </div>
     <div class="flex items-center space-x-4">
-      {#if showAction && actionText}
-        <button
-          class="px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors duration-200"
-          on:click={handleAction}
-        >
-          {actionText}
-        </button>
-      {/if}
-      {#if !showAction}
       <label class="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
@@ -60,7 +42,6 @@
           class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
         ></div>
       </label>
-      {/if}
     </div>
   </div>
   
