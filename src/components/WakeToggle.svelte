@@ -1,9 +1,26 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
   import toast from 'svelte-french-toast';
+  import { sendNotification } from '../lib/notify'
+  import { stateNotifications } from '../lib/store'
 
   let wakeLockObj: WakeLockSentinel = $state(null);
   let wakeEnable: boolean = $state(false);
+
+  function handleWakeLockAbort() {
+    console.warn('Wake lock has been released.');
+
+    wakeLockObj = null;
+    wakeEnable = false;
+
+    if ($stateNotifications) {
+      sendNotification("🌙 NoSleep™ Disabled", "NoSleep™ feature was disabled because you left the page, minimized the browser, or locked the device manually.")
+    }
+
+    toast("NoSleep was deactivated!\n\nDon't switch browser tab and keep browser focused.\n\nOther apps can be opend.", {
+      duration: 6000,
+    })
+  }
 
   async function toggleWakeLock(enable: boolean) {
     if (enable) {
@@ -13,24 +30,16 @@
         wakeEnable = true
         toast.success("NoSleep enabled")
 
-        wakeLockObj.addEventListener('release', () => {
-            console.log('Wake lock has been released.');
-
-            wakeLockObj = null;
-            wakeEnable = false;
-
-            
-
-            toast("NoSleep was deactivated!\nDon't switch browser tab and keep browser focused.\n Other apps can be opend.", {
-              duration: 6000,
-            })
-        });
+        wakeLockObj.addEventListener('release', handleWakeLockAbort);
 
       } catch (err) {
         console.log(err.name, err.message)
         toast.error(err.name)
       }
     } else {
+
+      wakeLockObj.removeEventListener("release", handleWakeLockAbort)
+
       wakeLockObj.release().then(() => {
         wakeLockObj = null;
         wakeEnable = false

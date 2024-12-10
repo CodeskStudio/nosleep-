@@ -2,19 +2,22 @@
   import { onMount } from 'svelte';
   import toast from 'svelte-french-toast';
   import { stringToBoolean } from '../lib/utils'
+  import { stateNotifications } from '../lib/store'
+
 
   import Icon from '@iconify/svelte';
 
   type NotificationPermission = 'default' | 'granted' | 'denied';
 
-  let sendNotification: boolean = $state(false)
+  // let sendNotification: boolean = $state(false)
   let isToggleDisabled = $state(Notification.permission === "denied")
 
   let description = $derived.by(() => {
 
-    if (!sendNotification) {
+    if (!$stateNotifications) {
       return isToggleDisabled ? "Notification blocked by Browser" : "Notification disabled";
-    } 
+    }
+
     return "Notification enabled";
 
   });
@@ -24,11 +27,11 @@
     const loadedNotifyModeState: string = localStorage.getItem("notificationState")
 
     if (loadedNotifyModeState !== null) {
-      sendNotification = stringToBoolean(loadedNotifyModeState)
+      $stateNotifications = stringToBoolean(loadedNotifyModeState)
     }
 
     if (Notification.permission === "denied" || Notification.permission === "default") {
-      sendNotification = false
+      $stateNotifications = false
       localStorage.setItem("notificationState", "false")
     }
 
@@ -42,7 +45,7 @@
         localStorage.setItem("notificationState", "true")
         return 'Permission granted';
       } else {
-        sendNotification = false
+        $stateNotifications = false
         localStorage.setItem("notificationState", "true")
         throw new Error('Permission denied');
       }
@@ -57,8 +60,8 @@
       const currentStatus: NotificationPermission = Notification.permission
       if (currentStatus === "granted") {
 
-        sendNotification = toggleTo
-        localStorage.setItem("notificationState", sendNotification.toString())
+        $stateNotifications = toggleTo
+        localStorage.setItem("notificationState", $stateNotifications.toString())
 
         toast.success("Notification enabled")
 
@@ -75,16 +78,16 @@
           }
         );
 
-        sendNotification = toggleTo
+        $stateNotifications = toggleTo
 
       } else {
         toast.error("Notification Permission blocked")
-        sendNotification = false
+        $stateNotifications = false
 
       }
     } else {
-      sendNotification = toggleTo
-      localStorage.setItem("notificationState", sendNotification.toString())
+      $stateNotifications = toggleTo
+      localStorage.setItem("notificationState", $stateNotifications.toString())
       toast.error("Notification disabled")
     }
 
@@ -96,7 +99,7 @@
   <div class="flex items-center space-x-3">
     <Icon
       icon="lucide:bell"
-      class={`w-6 h-6 ${sendNotification ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}
+      class={`w-6 h-6 ${$stateNotifications ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}
     />
     <div>
       <h2 class="text-sm font-medium text-gray-900 dark:text-white">Notifications</h2>
@@ -108,7 +111,7 @@
       <input
         type="checkbox"
         class="sr-only peer"
-        checked={sendNotification}
+        checked={$stateNotifications}
         onchange={switchNotification}
         disabled={isToggleDisabled}
       />
