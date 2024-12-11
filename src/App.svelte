@@ -13,6 +13,8 @@
   import WakeToggle from './components/WakeToggle.svelte';
   import Footer from './components/Footer.svelte';
 
+  import Modal from "./components/Modal.svelte";
+
   let toastDarkmode: ToastOptions = {
     style: "background: #1F2937; color: #fff;"
 	};
@@ -121,11 +123,18 @@
         </div>
       {/if}
 
+      <!-- add timer -->
+      <!-- add time stat -->
+
     </div>
 
     <Footer />
   </div>
 
+
+  <Modal />
+
+  <!-- TODO: Fix light mode, dark notify -->
   <Toaster 
     position="top-center"
     toastOptions={stateDarkMode ? toastDarkmode : toastLightmode}

@@ -4,6 +4,8 @@
   import { sendNotification } from '../lib/notify'
   import { stateNotifications } from '../lib/store'
 
+  import { openModal } from './ModalFunctions'
+
   let wakeLockObj: WakeLockSentinel = $state(null);
   let wakeEnable: boolean = $state(false);
 
@@ -17,9 +19,28 @@
       sendNotification("🌙 NoSleep™ Disabled", "NoSleep™ feature was disabled because you left the page, minimized the browser, or locked the device manually.")
     }
 
-    toast("NoSleep was deactivated!\n\nDon't switch browser tab and keep browser focused.\n\nOther apps can be opend.", {
-      duration: 6000,
-    })
+    openModal(
+        "🌙 NoSleep™ Disabled",
+        `<p class="text-sm text-gray-300 mb-4">
+            The NoSleep™ feature was automatically turned off because the system detected one of the following actions:
+        </p>
+        <ul class="list-disc list-inside text-sm text-gray-400 mb-4">
+            <li>You navigated away from the page.</li>
+            <li>You minimized the browser window.</li>
+            <li>You manually locked your device.</li>
+        </ul>
+        <p class="text-sm text-gray-300">
+            To ensure uninterrupted functionality, please keep the page active and the browser in focus. If you wish to re-enable the feature, revisit the page or restart the service.
+        </p>
+            
+      `,
+        () => console.log("Modal closed")
+    );
+
+    // REPLACED by Modal
+    // toast("NoSleep was deactivated!\n\nDon't switch browser tab and keep browser focused.\n\nOther apps can be opend.", {
+    //   duration: 6000,
+    // })
   }
 
   async function toggleWakeLock(enable: boolean) {
